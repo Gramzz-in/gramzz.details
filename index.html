@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gramzz</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&family=Wendy+One&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- GSAP for Animations (Optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Root Variables */
+        :root {
+            /* Light Mode Variables */
+            --background-light: #E8F5E9; /* Soft Mint */
+            --background-dark: #1B3B1A; /* Deep Forest Green */
+            --card-light: rgba(255, 255, 255, 0.15);
+            --card-dark: rgba(27, 59, 26, 0.7); /* Semi-transparent Dark Green */
+            --text-light: #FFFFFF; /* White for better contrast in dark mode */
+            --text-dark: #2E7D32; /* Dark Olive */
+            --glass-bg-light: rgba(255, 255, 255, 0.25);
+            --glass-bg-dark: rgba(0, 0, 0, 0.7); /* Darker glass for dark mode */
+            --accent-color: #66BB6A; /* Accent Green */
+            --glitch-color: #F7CA05; /* Glitch Yellow */
+            --grey-dark: #2F4F4F; /* Dark Grey */
+            --grey-light: #A9A9A9; /* Light Grey */
+            --black: #000000; /* Pure Black */
+        }
+
+        /* Reset and Body Styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--background-dark); /* Dark mode by default */
+            color: var(--text-light); /* Light text by default */
+            overflow: hidden;
+            transition: background 0.5s, color 0.5s;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Light Mode Styles */
+        body.light-mode {
+            background: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        /* SVG Background Styles */
+        .svg-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1; /* Ensure it sits behind all content */
+            overflow: hidden;
+        }
+
+        .svg-background svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Glassmorphic Layer Styles */
+        .glass-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            backdrop-filter: blur(10px);
+            background: var(--glass-bg-dark);
+            transition: background 0.5s;
+            z-index: 0; /* Sits above SVG but below main content */
+        }
+
+        body.light-mode .glass-layer {
+            background: var(--glass-bg-light);
+        }
+
+        /* Intro Animation Styles */
+        #intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-dark); /* Deep Forest Green for darker intro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Arrange items vertically */
+            z-index: 2000; /* Ensures it stays on top */
+            transition: opacity 2s ease-out, visibility 2s ease-out, filter 2s ease-out; /* Extended transition for blur */
+        }
+
+        /* Gramzz.IN Title Styles */
+        .gramzz-title {
+            font-size: 2.5em;
+            color: var(--text-light); /* White for better contrast */
+            text-transform: uppercase;
+            /* letter-spacing: 2px; */
+            /* margin: 20px;  Added margin */
+            /* padding: 10px; */ /* Added padding */
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            font-family: 'Wendy One', sans-serif; /* Maintained font */
+            transition: color 0.5s; /* Ensure color transitions with theme */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Gramzz Logo Styles */
+        .gramzz-logo {
+            padding-bottom: 10px;
+            height: 50px; /* Adjust size as needed */
+            width: auto;
+            margin-left: 15px; /* Space between text and icon */
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        body.light-mode .gramzz-title {
+            color: var(--text-dark); /* Dark Olive in light mode */
+            text-shadow: 0 0 5px rgba(46, 125, 50, 0.5);
+        }
+
+        /* Wrapper Styles */
+        #wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Sits above the glass layer */
+        }
+
+        /* Clouds and Ground Styles */
+        #clouds {
+            background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png") repeat-x 0 bottom #ACE6FF;
+            width: 100%;
+            height: 230px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            transform: translate3d(0, 0, 0.01);
+            backface-visibility: hidden;
+        }
+
+        #ground {
+            background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png") repeat-x 0 0 transparent;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 2;
+            width: 100%;
+            height: 192px;
+            transform: translate3d(0, 0, 0.01);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        /* Clock Styles with Zoom-In Animation and Enhanced Styling */
+        .clock {
+            position: relative;
+            width: 90%;
+            max-width: 700px;
+            height: 250px;
+            background: var(--card-dark); /* Semi-transparent Dark Green */
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Deeper shadow */
+            z-index: 1000;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            margin: auto;
+            transition: background 0.5s;
+            opacity: 0; /* Initial state for zoom-in */
+            transform: scale(0.5); /* Initial state for zoom-in */
+            animation: zoomInClock 1s ease-out forwards; /* Zoom-In Animation */
+            animation-delay: 5s; /* Start after intro */
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body.light-mode .clock {
+            background: var(--card-light);
+        }
+
+        @keyframes zoomInClock {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Section Styles */
+        section {
+            justify-content: center;
+            align-items: center;
+            padding: 0 5%;
+        }
+
+        /* Clock Container Styles with Enhanced Font and Responsiveness */
+        .clock .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 15px;
+        }
+
+        .clock .container h2 {
+            font-size: 6em;
+            color: inherit;
+            transition: color 0.5s;
+            font-family: 'Montserrat', sans-serif; /* Ensured font consistency */
+        }
+
+        .clock .container h2:nth-child(odd) {
+            padding: 5px 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2); /* Deeper shadow */
+            margin: 0 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .clock .container h2#seconds {
+            color: var(--accent-color); /* Accent Green */
+        }
+
+        /* Dark Mode Toggle Styles with Slide-In Animation */
+        .toggle-dark-mode {
+            position: fixed;
+            top: 10px;
+            right: 0px;
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 1010;
+            transform: translateX(100%); /* Initial state off-screen */
+            animation: slideInToggle 0.5s ease-out forwards; /* Slide-In Animation */
+            animation-delay: 5s; /* Start after intro */
+            color: var(--text-light); /* Default text color */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 10px;
+            border-radius: 10px 0 0 10px;
+            transition: background-color 0.5s, color 0.5s;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.light-mode .toggle-dark-mode {
+            color: var(--text-dark);
+            background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent background for light mode */
+        }
+
+        @keyframes slideInToggle {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* WhatsApp Float Button Styles with Slide-In and Glow Animations */
+        .float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 50px;
+            right: 40px;
+            background-color: #25D366; /* WhatsApp Green */
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 1010;
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+            animation: slideInFloat 0.5s ease-out forwards, glow 1.5s infinite alternate;
+            transform: translateX(100%);
+            animation-delay: 5s; /* Start after intro */
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .float:hover {
+            box-shadow: 0 0 10px #25D366;
+            transform: scale(1.1);
+        }
+
+        .my-float {
+            margin-top: 16px;
+        }
+
+        @keyframes slideInFloat {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Glowing Effect Animation */
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px #25D366;
+            }
+            100% {
+                box-shadow: 0 0 20px #25D366;
+            }
+        }
+
+        /* Rotating Text Styles */
+        .rotatingText { 
+            margin-top: 30px;
+            align-items: center;
+            display: flex;
+            height: 30vh;
+            text-align: center;
+            position: relative;
+            flex-direction: column;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .rotatingText-content { 
+            position: relative;
+            width: 100%;
+        }
+
+        .rotatingText-description {
+            font-family: 'Roboto', sans-serif;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 11px;
+            margin: 10px 0;
+            color: var(--text-light);
+            transition: color 0.5s, text-shadow 0.5s;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        @media (min-width: 768px) { 
+            .rotatingText-description {
+                font-size: 18px;
+            }
+        }
+
+        .rotatingText-adjective { 
+            font-family: 'Montserrat', sans-serif;
+            font-style: italic;
+            color: var(--text-light);
+            transition: color 0.5s, text-shadow 0.5s;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            font-size: 30px;
+            left: 0;
+            margin-bottom: 0;
+            margin-top: 30px;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: center;
+            text-transform: uppercase;
+            top: 0;
+        }
+
+        body.light-mode .rotatingText-adjective {
+            color: var(--text-dark);
+            text-shadow: 0 0 5px rgba(46, 125, 50, 0.5);
+        }
+
+        @media (min-width: 768px) { 
+            .rotatingText-adjective {
+                font-size: 70px;
+            }
+        }
+
+        /* Slowed Down Rotating Text Animations */
+        .rotatingText-adjective:nth-of-type(1) { 
+            animation: rotate-text-up 3s 1s forwards; /* Slowed down and adjusted delay */
+            font-family: 'Montserrat', sans-serif;
+            color: var(--accent-color); /* Accent Green */
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        body.light-mode .rotatingText-adjective:nth-of-type(1) {
+            color: var(--text-dark);
+            text-shadow: 0 0 10px #2E7D32;
+        }
+
+        /* Rotating Text Animations */
+        @keyframes rotate-text-up { 
+            0% {
+                transform: translate3d(0, 80px, 0);
+                opacity: 0;
+            }
+            20%, 80% {
+                transform: translate3d(0, 0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate3d(0, -40px, 0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fade-text-in { 
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 80px, 0);
+            }
+            50%, 100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            #wrapper {
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+            }
+            #clouds, #ground {
+                width: 100vw;
+                position: fixed;
+            }
+            .clock {
+                width: 95%;
+                max-width: none;
+                margin: 20px auto;
+                transform: scale(0.9);
+            }
+            .clock .container {
+                gap: 5px;
+                padding: 0 5px;
+            }
+            .clock .container h2 {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (max-width: 428px), (max-height: 587px) {
+            #wrapper {
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+            }
+            .rotatingText-adjective {
+                font-size: 16px;
+            }
+            #clouds, #ground {
+                width: 100vw;
+                position: fixed;
+            }
+            .clock {
+                width: 95%;
+                max-width: none;
+                margin: 10px auto;
+                transform: scale(0.85);
+            }
+            .clock .container {
+                gap: 1px;
+                padding: 0 5px;
+            }
+            .clock .container h2 {
+                font-size: 1.8em;
+            }
+            .clock .container h2:nth-child(odd) {
+                padding: 2px 8px;
+                margin: 0 5px;
+            }
+        }
+
+        /* Links Styles */
+        .links {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-family: 'Roboto', sans-serif;
+            z-index: 1010; /* Above glass layer */
+        }
+
+        .links a {
+            text-decoration: none;
+            color: var(--text-light); /* Light text for visibility on dark */
+            margin-left: 1em;
+            display: flex;
+            align-items: center;
+            transition: color 0.5s;
+        }
+
+        body.light-mode .links a {
+            color: var(--text-dark);
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+            color: var(--accent-color);
+        }
+
+        .links a img.icon {
+            display: inline-block;
+            height: 1em;
+            margin: 0 0 -0.1em 0.3em;
+        }
+
+        /* Enhanced Interactivity */
+        .gramzz-title:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Smooth transitions for hover effects */
+        .toggle-dark-mode:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        body.light-mode .toggle-dark-mode:hover {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Background -->
+    <div class="svg-background">
+        <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 120 120">
+            <defs>
+                <style>
+                    @keyframes rotate {
+                        0% {
+                            transform: rotate(0deg);
+                        }
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+                    .out-top {
+                        animation: rotate 20s linear infinite;
+                        transform-origin: 30px 30px;
+                    }
+                    .in-top {
+                        animation: rotate 10s linear infinite;
+                        transform-origin: 30px 30px;
+                    }
+                    .out-bottom {
+                        animation: rotate 25s linear infinite;
+                        transform-origin: 90px 90px;
+                    }
+                    .in-bottom {
+                        animation: rotate 15s linear infinite;
+                        transform-origin: 90px 90px;
+                    }
+                </style>
+            </defs>
+            <!-- Adjusted colors for green theme -->
+            <path fill="#66BB6A" class="out-top" d="M37-5C25.1-14.7,5.7-19.1-9.2-10-28.5,1.8-32.7,31.1-19.8,49c15.5,21.5,52.6,22,67.2,2.3C59.4,35,53.7,8.5,37-5Z"/>
+            <path fill="#81C784" class="in-top" d="M20.6,4.1C11.6,1.5-1.9,2.5-8,11.2-16.3,23.1-8.2,45.6,7.4,50S42.1,38.9,41,24.5C40.2,14.1,29.4,6.6,20.6,4.1Z"/>
+            <path fill="#4CAF50" class="out-bottom" d="M105.9,48.6c-12.4-8.2-29.3-4.8-39.4.8-23.4,12.8-37.7,51.9-19.1,74.1s63.9,15.3,76-5.6c7.6-13.3,1.8-31.1-2.3-43.8C117.6,63.3,114.7,54.3,105.9,48.6Z"/>
+            <path fill="#A5D6A7" class="in-bottom" d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"/>
+        </svg>
+    </div>
+
+    <!-- Glassmorphic Layer -->
+    <div class="glass-layer"></div>
+
+    <!-- Intro Animation -->
+    <div id="intro">
+        <!-- Removed glitch-effect and added gramzz-title with margin and padding -->
+        <div style="display: flex; align-items: center;">
+            <h3 class="gramzz-title">GRAMZZ.IN 🥗</h3>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="wrapper">
+     
+            <!-- Rotating Text Section -->
+            <section class="rotatingText">
+                <div class="rotatingText-content">
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <!-- Removed glitch-effect and added gramzz-title with margin and padding -->
+                        <h3 class="gramzz-title">GRAMZZ.IN 🥗</h3>
+                        <!--<img src="gramzz.png" alt="GRAMZZ.IN" class="gramzz-logo">-->
+                    </div>
+
+                    <p class="rotatingText-description">
+                        Launching Fresh Fruits & Veggies Delivered to Your Doorstep
+                    </p>
+
+                    <!-- Additional Rotating Adjectives (if any) -->
+                    <!-- Example:
+                    <div class="rotatingText-adjective">Fresh</div>
+                    <div class="rotatingText-adjective">Organic</div>
+                    <div class="rotatingText-adjective">Healthy</div>
+                    -->
+                </div>
+            </section>
+
+            <p id="launchText" style="font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: 14px; margin: 0; color: var(--text-dark); transition: color 0.5s, text-shadow 0.5s; text-align: center; text-shadow: 0 0 5px rgba(46, 125, 50, 0.5);">
+                Launching the website in
+            </p>
+        <!-- Clock Section -->
+        <section>
+            <div class="clock">
+                <div class="container">
+                    <div style="text-align: center;">
+                        <!-- Days -->
+                        <h2 id="days">08</h2>
+                        <h2 style="font-size: 10px;">Days</h2>
+                    </div>
+
+                    <h2 class="dot">:</h2>
+                    
+                    <div style="text-align: center;">
+                        <!-- Hours -->
+                        <h2 id="hour">00</h2>
+                        <h2 style="font-size: 10px;">Hours</h2>
+                    </div>
+
+                    <h2 class="dot">:</h2>
+                    
+                    <div style="text-align: center;">
+                        <!-- Minutes -->
+                        <h2 id="minute">00</h2>
+                        <h2 style="font-size: 10px;">Minutes</h2>
+                    </div>
+
+                    <h2 class="dot">:</h2>
+                    
+                    <div style="text-align: center;">
+                        <!-- Seconds -->
+                        <h2 id="seconds" style="color: var(--accent-color);">00</h2>
+                        <h2 style="font-size: 10px;">Seconds</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+            <p id="launchText" style="font-family: 'Montserrat', sans-serif; font-style: italic; font-size: 14px; margin: 0; color: var(--text-light); transition: color 0.5s, text-shadow 0.5s; text-shadow: 0 0 5px rgba(224, 242, 233, 0.5); text-align: center;">
+                Contact us ˋ°•*⁀➷
+            </p>
+            
+            
+        </section>
+        
+    </div>
+   
+    <!-- Dark Mode Toggle Button -->
+    <div class="toggle-dark-mode" id="darkModeToggle">&#x1F31D;</div>
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.link/ge09ld" class="float" target="_blank" aria-label="Chat on WhatsApp">
+        <i class="fa fa-whatsapp my-float"></i>
+    </a>
+
+
+    <!-- JavaScript for Animations and Theme Toggle -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+            // Theme Toggle Functionality
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const body = document.body;
+
+            // Check for saved theme in localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+                darkModeToggle.innerHTML = '&#x1F31E;'; // Sun icon
+            } else {
+                body.classList.remove('light-mode');
+                darkModeToggle.innerHTML = '&#x1F31D;'; // Moon icon
+            }
+
+            // Toggle Dark Mode on Click
+            darkModeToggle.addEventListener('click', () => {
+                body.classList.toggle('light-mode');
+                const isLightMode = body.classList.contains('light-mode');
+                
+                // Update toggle icon
+                darkModeToggle.innerHTML = isLightMode ? '&#x1F31E;' : '&#x1F31D;';
+
+                // Save the user's preference in localStorage
+                localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            });
+
+            // Intro Animation Transition
+            const intro = document.getElementById('intro');
+
+            // Animate "GRAMZZ.IN" to move up
+            gsap.to("#intro .gramzz-title", {
+                y: -213.5, // Adjust based on desired movement
+                duration: 2,
+                ease: "power2.out",
+                delay: 1.5, // Start movement after 1.5 seconds
+                onComplete: () => {
+                    // Wait for 0.1 seconds before starting fade-out
+                    gsap.to(intro, {
+                        opacity: 0,
+                        filter: "blur(10px)", // Apply blur during fade-out
+                        duration: 2, // Duration of fade-out
+                        ease: "power2.out",
+                        onComplete: () => {
+                            intro.style.visibility = 'hidden';
+                        }
+                    });
+                }
+            });
+        });
+
+        // Timer Functionality
+        // Retrieve target date from localStorage if it exists, else set it to 8 days from now
+        let targetDate;
+        if (localStorage.getItem('targetDate')) {
+            targetDate = new Date(localStorage.getItem('targetDate'));
+        } else {
+            targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 8);
+            localStorage.setItem('targetDate', targetDate);
+        }
+
+        function timer() {
+            let days = document.getElementById('days');
+            let hours = document.getElementById('hour');
+            let minute = document.getElementById('minute');
+            let seconds = document.getElementById('seconds');
+
+            // Get current time in Indian Standard Time (IST)
+            const now = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+            const currentTime = new Date(now);
+
+            // Calculate remaining time
+            let diff = targetDate - currentTime;
+
+            if (diff <= 0) {
+                days.innerHTML = '00';
+                hours.innerHTML = '00';
+                minute.innerHTML = '00';
+                seconds.innerHTML = '00';
+                clearInterval(timerInterval);
+                return;
+            }
+
+            let d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            let s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            // Add 0 to the beginning if less than 10
+            d = (d < 10) ? '0' + d : d;
+            h = (h < 10) ? '0' + h : h;
+            m = (m < 10) ? '0' + m : m;
+            s = (s < 10) ? '0' + s : s;
+
+            days.innerHTML = d;
+            hours.innerHTML = h;
+            minute.innerHTML = m;
+            seconds.innerHTML = s;
+        }
+
+        const timerInterval = setInterval(timer, 1000);
+    </script>
+</body>
+</html>
